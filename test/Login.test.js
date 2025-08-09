@@ -39,7 +39,10 @@ describe('Login', () => {
 
   it('shows error message on failed login', async () => {
     vi.stubGlobal('fetch', vi.fn(() =>
-      Promise.resolve({ ok: false })
+      Promise.resolve({ 
+        ok: false,
+        status: 401
+      })
     ));
 
     render(Login);

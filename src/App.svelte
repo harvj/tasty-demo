@@ -2,6 +2,7 @@
   import { session } from './stores/session';
   import Login from './components/Login.svelte';
   import Logout from './components/Logout.svelte';
+  import Watchlists from './components/Watchlists.svelte';
 </script>
 
 <nav class="navbar">
@@ -19,7 +20,7 @@
 <main>
   {#if $session}
     <h2>Welcome!</h2>
-    <!-- replace with your app's main content -->
+    <Watchlists />
   {:else}
     <Login />
   {/if}

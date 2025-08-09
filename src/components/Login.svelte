@@ -1,41 +1,21 @@
 <script>
-  import { session } from '../stores/session.js';
+  import { login } from '../lib/api.js';
 
   let username = '';
   let password = '';
   let errorMessage = '';
 
-  async function login() { 
+  async function handleLogin() {
     errorMessage = '';
-    try {
-      const response = await fetch('https://api.cert.tastyworks.com/sessions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ login: username, password })
-      });
+    const result = await login(username, password);
 
-      if (response.ok) {
-        const data = await response.json();
-        session.set({
-          user: {
-            username: data.data.user.username,
-            email: data.data.user.email
-          },
-          token: data.data['session-token']
-        });
-      } else {
-        errorMessage = 'Invalid username or password.';
-        session.set(null);
-      }
-    } catch (err) {
-      console.error(err);
-      errorMessage = 'Unable to connect to the server. Please try again.';
-      session.set(null);
+    if (!result.success) {
+      errorMessage = result.message;
     }
   }
 </script>
 
-<form on:submit|preventDefault={login}>
+<form on:submit|preventDefault={handleLogin}>
   <input type="text" placeholder="Username" bind:value={username} />
   <input type="password" placeholder="Password" bind:value={password} />
   <button type="submit">Login</button>
