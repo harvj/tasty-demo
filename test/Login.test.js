@@ -20,7 +20,6 @@ describe('Login', () => {
 
     render(Login);
 
-    // Fill in username/password
     await fireEvent.input(screen.getByPlaceholderText(/Username/i), {
       target: { value: 'jimharvey' }
     });
@@ -28,10 +27,8 @@ describe('Login', () => {
       target: { value: 'secret' }
     });
 
-    // Submit form
     await fireEvent.submit(screen.getByRole('button', { name: /Login/i }));
 
-    // Assert store updated
     let storeValue;
     session.subscribe(v => (storeValue = v))();
     expect(storeValue).toEqual({
