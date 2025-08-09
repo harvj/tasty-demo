@@ -38,7 +38,7 @@
 <form on:submit|preventDefault={login}>
   <input type="text" placeholder="Username" bind:value={username} />
   <input type="password" placeholder="Password" bind:value={password} />
-  <button type="submit">Log In</button>
+  <button type="submit">Login</button>
 
   {#if errorMessage}
     <p class="error">{errorMessage}</p>
