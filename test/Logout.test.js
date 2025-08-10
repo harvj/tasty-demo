@@ -17,6 +17,8 @@ describe('Logout', () => {
 
     render(Logout);
 
+    expect(await screen.findByText(/Logged in as jimharvey/i)).toBeInTheDocument();
+
     await fireEvent.click(screen.getByRole('button', { name: /Logout/i }));
 
     let storeValue;

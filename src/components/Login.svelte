@@ -15,18 +15,26 @@
   }
 </script>
 
-<form on:submit|preventDefault={handleLogin}>
-  <input type="text" placeholder="Username" bind:value={username} />
-  <input type="password" placeholder="Password" bind:value={password} />
-  <button type="submit">Login</button>
+<div class='login-wrapper'>
+  <form on:submit|preventDefault={handleLogin}>
+    <input type="text" placeholder="Username" bind:value={username} />
+    <input type="password" placeholder="Password" bind:value={password} />
+    <button type="submit">Login</button>
 
-  {#if errorMessage}
-    <p class="error">{errorMessage}</p>
-  {/if}
-</form>
-
+    {#if errorMessage}
+      <p class="error">{errorMessage}</p>
+    {/if}
+  </form>
+</div>
 
 <style>
+  .login-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: calc(100vh - 60px); /* Adjust if navbar height changes */
+  }
+
   .error {
     color: red;
     margin-top: 0.5rem;

@@ -24,6 +24,7 @@
   onDestroy(unsubscribe);
 </script>
 
+<h2>Watchlists</h2>
 {#if error}
   <p style="color: red">{error}</p>
 {:else if watchlists.length === 0}

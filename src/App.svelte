@@ -1,64 +1,36 @@
 <script>
   import { session } from './stores/session';
   import Login from './components/Login.svelte';
-  import Logout from './components/Logout.svelte';
-  import Watchlists from './components/Watchlists.svelte';
+  import Navbar from './components/Navbar.svelte';
+  import Sidebar from './components/Sidebar.svelte';
+  import { onDestroy } from 'svelte';
+
+  let loggedIn = false;
+  const unsubscribe = session.subscribe(s => {
+    loggedIn = !!s?.token;
+  });
+  onDestroy(unsubscribe);
 </script>
 
-<nav class="navbar">
-  <div class="nav-left">
-    <h1>Watchlist Demo 🍒</h1>
-  </div>
-  <div class="nav-right">
-    {#if $session}
-      <span>Logged in as {$session.user.username}</span>
-      <Logout />
-    {/if}
-  </div>
-</nav>
+<Navbar />
 
-<main>
-  {#if $session}
-    <h2>Welcome!</h2>
-    <Watchlists />
-  {:else}
-    <Login />
-  {/if}
-</main>
+{#if loggedIn}
+  <div class="main-content with-sidebar">
+    <h1>Welcome!</h1>
+  </div>
+  <Sidebar />
+{:else}
+  <Login />
+{/if}
 
 <style>
-  .navbar {
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.75rem 1rem;
-    background-color: #222;
-    color: #fff;
-    box-sizing: border-box;
+  .main-content {
+    padding: 1rem;
+    margin-top: 60px; /* navbar height */
+    transition: margin-right 0.3s ease;
   }
 
-  .nav-left h1 {
-    font-size: 1.25rem;
-    margin: 0;
-  }
-
-  .nav-right {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-  }
-
-  main {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: calc(100vh - 60px); /* subtract navbar height */
-    text-align: center;
-  }
-
-  h2 {
-    margin: 0;
+  .with-sidebar {
+    margin-right: 300px; /* sidebar width */
   }
 </style>
