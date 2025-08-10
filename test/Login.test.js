@@ -9,6 +9,9 @@ describe('Login', () => {
     vi.stubGlobal('fetch', vi.fn(() =>
       Promise.resolve({
         ok: true,
+        headers: {
+          get: (name) => name.toLowerCase() === 'content-type' ? 'application/json' : null
+        },
         json: () => Promise.resolve({
           data: {
             user: { username: 'jimharvey' },

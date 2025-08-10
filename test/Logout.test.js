@@ -8,7 +8,12 @@ describe('Logout', () => {
     session.set({ user: { username: 'jimharvey' }, token: 'fake-token' });
 
     // Mock fetch to simulate API success
-    vi.stubGlobal('fetch', vi.fn(() => Promise.resolve({ ok: true })));
+    vi.stubGlobal('fetch', vi.fn(() =>
+      Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({})
+      })
+    ));
 
     render(Logout);
 

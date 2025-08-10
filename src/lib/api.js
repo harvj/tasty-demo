@@ -11,7 +11,7 @@ const API_BASE_URL = 'https://api.cert.tastyworks.com';
  */
 async function request(method, endpoint, body) {
   const token = get(session)?.token;
-  
+
   const headers = {
     'Content-Type': 'application/json',
     'User-Agent': 'jimharvey-client/0.0.1'
@@ -24,7 +24,7 @@ async function request(method, endpoint, body) {
   const url = `${API_BASE_URL}${endpoint}`
   console.log(`Fetching ${url}`)
   const response = await fetch(url, {
-    method, 
+    method,
     headers,
     body: body ? JSON.stringify(body) : undefined,
   });
@@ -37,6 +37,10 @@ async function request(method, endpoint, body) {
     throw new Error(`API ${method} ${endpoint} failed: ${errMsg}`);
   }
 
+  const contentType = response.headers?.get?.('content-type') || '';
+  if (!contentType.includes('application/json')) {
+    return null;
+  }
   return response.json();
 }
 
@@ -68,6 +72,16 @@ export async function login(username, password) {
   }
 }
 
+export async function logout() {
+  try {
+    await request('DELETE', '/sessions');
+  } catch (err) {
+    console.error(err)
+  } finally {
+    session.set(null);
+  }
+}
+
 export async function getWatchlists() {
   const result = await request('GET', '/watchlists');
   return result.data.items;
@@ -75,5 +89,6 @@ export async function getWatchlists() {
 
 export default {
   getWatchlists,
-  login
+  login,
+  logout
 };
