@@ -6,24 +6,27 @@
 
   export let events = {};
 
-  let watchlistData = null;
+
   let errorMessage = '';
   let newName = '';
-  let searchTerm = '';
-  let searchResults = [];
+  let watchlistName = '';
+  let watchlistEntries = [];
   let selectedEntries = [];
   let lastWatchlist = '';
 
-  $: if ($session?.watchlist && $session.watchlist !== lastWatchlist) {
-    lastWatchlist = $session.watchlist;
-    fetchWatchlist();
+  $: watchlistName = $session?.watchlist
+
+  $: if (watchlistName && watchlistName !== lastWatchlist) {
+    lastWatchlist = watchlistName;
+    refreshState();
+    refreshWatchlist();
   }
 
-  async function fetchWatchlist() {
-    if ($session?.watchlist) {
-      const { success, result, message } = await getWatchlist($session.watchlist);
+  async function refreshWatchlist() {
+    if (watchlistName) {
+      const { success, result, message } = await getWatchlist(watchlistName);
       if (success) {
-        watchlistData = result.data;
+        watchlistEntries = result.data['watchlist-entries'];
       } else {
         errorMessage = message;
       }
@@ -38,33 +41,39 @@
     const { success, message } = await createWatchlist(newName, selectedEntries);
     if (success) {
       session.set({ ...$session, watchlist: newName });
-      watchlistData = null;
-      await fetchWatchlist();
+      await refreshWatchlist();
       events.watchlistsChanged?.();
     } else {
       errorMessage = message;
     }
   }
 
-  async function handleDelete(name) {
-    const { success, message } = await deleteWatchlist(name);
+  async function handleDelete() {
+    const { success, message } = await deleteWatchlist(watchlistName);
     if (success) {
       session.set({ ...$session, watchlist: null });
-      watchlistData = null;
+      refreshState();
       events.watchlistsChanged?.();
     } else {
       errorMessage = message;
     }
+  }
+
+  function refreshState() {
+    errorMessage = '';
+    newName = '';
+    selectedEntries = [];
+    watchlistEntries = [];
   }
 
   function deselectSymbol(symbol) {
     selectedEntries = selectedEntries.filter(entry => entry.symbol !== symbol);
   }
 
-  onMount(fetchWatchlist);
+  onMount(refreshWatchlist);
 </script>
 
-{#if !$session?.watchlist}
+{#if !watchlistName}
   <h2>Create New Watchlist</h2>
   {#if errorMessage}<p class="error">{errorMessage}</p>{/if}
   <input placeholder="Watchlist Name" bind:value={newName} />
@@ -95,16 +104,26 @@
   />
 
 {:else}
-  {#if watchlistData}
-    <h2>Watchlist: <span class="name">{watchlistData.name}</span></h2>
+  {#if watchlistEntries}
+    <h2>Watchlist: <span class="name">{watchlistName}</span></h2>
     <ul>
-      {#each watchlistData['watchlist-entries'] as entry}
+      {#each watchlistEntries as entry}
         <li>{entry.symbol}</li>
       {/each}
     </ul>
+
+    <SymbolSearch
+      mode="existing"
+      {watchlistName}
+      selectedEntries={watchlistEntries}
+      events={{
+        addWatchlistEntry: () => refreshWatchlist()
+      }}
+    />
+
     <button
       class="delete"
-      on:click={() => handleDelete(watchlistData.name)}
+      on:click={handleDelete}
     >
       Delete Watchlist
     </button>
@@ -137,5 +156,9 @@
   .symbol-item {
     margin-right: 0.5rem;
     font-weight: normal;
+  }
+
+  button.delete {
+    margin-top: 20px;
   }
 </style>

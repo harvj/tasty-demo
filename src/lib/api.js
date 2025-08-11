@@ -106,7 +106,7 @@ export async function createWatchlist(name, entries) {
 }
 
 export async function updateWatchlist(name, entries) {
-  return request('PUT', `/watchlists/${encodeURIComponent(name)}`, { "watchlist-entries": entries });
+  return request('PUT', `/watchlists/${encodeURIComponent(name)}`, { name, "watchlist-entries": entries });
 }
 
 export async function deleteWatchlist(name) {

@@ -29,13 +29,11 @@
     if (isSelected(symbol)) return;
 
     if (mode === 'new') {
-      // parent listens for "add" in new mode
       events.selectSymbol({ symbol });
     } else if (mode === 'existing' && watchlistName) {
-      const res = await updateWatchlist(watchlistName, [{ symbol }]);
-      if (res.success) {
-        // parent listens for "added" in existing mode
-        events.added({ symbol });
+      const response = await updateWatchlist(watchlistName, [...selectedEntries, { symbol }]);
+      if (response.success) {
+        events.addWatchlistEntry({ symbol });
       }
     }
   }
