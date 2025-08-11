@@ -96,6 +96,15 @@ button.delete:hover {
   margin-left: 0.3rem;
 }
 
+.remove-btn {
+  background-color: #e24a4a;
+  color: white;
+}
+
+.remove-btn:hover {
+  background-color: #b83535;
+}
+
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;

@@ -3,9 +3,9 @@
   import { getWatchlist, createWatchlist, deleteWatchlist } from '../lib/api';
   import { onMount } from 'svelte';
   import SymbolSearch from './SymbolSearch.svelte';
+  import WatchlistDetails from './WatchlistDetails.svelte';
 
   export let events = {};
-
 
   let errorMessage = '';
   let newName = '';
@@ -105,12 +105,13 @@
 
 {:else}
   {#if watchlistEntries}
-    <h2>Watchlist: <span class="name">{watchlistName}</span></h2>
-    <ul>
-      {#each watchlistEntries as entry}
-        <li>{entry.symbol}</li>
-      {/each}
-    </ul>
+    <WatchlistDetails
+      {watchlistName}
+      entries={watchlistEntries}
+      events={{
+        removeWatchlistEntry: () => refreshWatchlist()
+      }}
+    />
 
     <SymbolSearch
       mode="existing"
@@ -134,23 +135,10 @@
 {/if}
 
 <style>
-  h2 span.name {
-    color: #6a6a6a;
-  }
-
   .selected-symbols {
     font-size: 1.17em;
     font-weight: bold;
     margin: 1em 0;
-  }
-
-  .remove-btn {
-    background-color: #e24a4a;
-    color: white;
-  }
-
-  .remove-btn:hover {
-    background-color: #b83535;
   }
 
   .symbol-item {

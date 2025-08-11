@@ -1,12 +1,14 @@
-import { writable } from 'svelte/store';
+import { get, writable } from 'svelte/store';
+import { session } from './session';
 
 export const quotes = writable({});
 
 let socket;
 let channelId = 1;
 
-export function connectQuotes({ token, symbols }) {
-  socket = new WebSocket('wss://demo.dxfeed.com/dxlink-ws');
+export function connectQuotes(symbols) {
+  const current = get(session);
+  socket = new WebSocket(current.dxlinkUrl);
 
   socket.onopen = () => {
     // 1. Setup
@@ -22,7 +24,7 @@ export function connectQuotes({ token, symbols }) {
     socket.send(JSON.stringify({
       type: 'AUTH',
       channel: 0,
-      token
+      token: current.apiQuoteToken
     }));
 
     // 3. Request feed channel
