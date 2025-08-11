@@ -1,9 +1,14 @@
 <script>
   import Watchlists from './Watchlists.svelte';
+  let watchlistsRef;
+
+  export function refreshWatchlists() {
+    watchlistsRef?.loadWatchlists();
+  }
 </script>
 
 <div class="sidebar">
-  <Watchlists />
+  <Watchlists bind:this={watchlistsRef} />
 </div>
 
 <style>

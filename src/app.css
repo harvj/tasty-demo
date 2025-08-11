@@ -43,9 +43,7 @@ form {
   margin: 0 auto;
 }
 
-label {
-  font-weight: 500;
-}
+.error { color: red; }
 
 input {
   padding: 0.6em 1.2em;
@@ -81,6 +79,21 @@ button:hover {
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
+}
+button.delete {
+  color: red;
+}
+button.delete:hover {
+  border-color: red;
+}
+
+.small-btn {
+  padding: 0.15rem 0.4rem;
+  font-size: 0.85rem;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  margin-left: 0.3rem;
 }
 
 @media (prefers-color-scheme: light) {

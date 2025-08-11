@@ -1,7 +1,10 @@
 <script>
   import { session } from '../stores/session';
-  import { getWatchlist, createWatchlist, updateWatchlist, searchSymbols } from '../lib/api';
+  import { getWatchlist, createWatchlist, deleteWatchlist } from '../lib/api';
   import { onMount } from 'svelte';
+  import SymbolSearch from './SymbolSearch.svelte';
+
+  export let events = {};
 
   let watchlistData = null;
   let errorMessage = '';
@@ -29,7 +32,7 @@
 
   async function handleCreate() {
     if (!newName || selectedEntries.length === 0) {
-      errorMessage = 'Please enter a name and add at least one symbol.';
+      errorMessage = 'Please enter a name and add at least one symbol by searching below.';
       return;
     }
     const { success, message } = await createWatchlist(newName, selectedEntries);
@@ -37,29 +40,24 @@
       session.set({ ...$session, watchlist: newName });
       watchlistData = null;
       await fetchWatchlist();
+      events.watchlistsChanged?.();
     } else {
       errorMessage = message;
     }
   }
 
-  async function handleSearch() {
-    if (searchTerm.length < 3) {
-      searchResults = [];
-      return;
-    }
-    const { success, result } = await searchSymbols(searchTerm);
+  async function handleDelete(name) {
+    const { success, message } = await deleteWatchlist(name);
     if (success) {
-      searchResults = result.data.items;
+      session.set({ ...$session, watchlist: null });
+      watchlistData = null;
+      events.watchlistsChanged?.();
+    } else {
+      errorMessage = message;
     }
   }
 
-  function addSymbol(symbol) {
-    if (!selectedEntries.find(e => e.symbol === symbol)) {
-      selectedEntries = [...selectedEntries, { symbol }];
-    }
-  }
-
-  function removeSymbol(symbol) {
+  function deselectSymbol(symbol) {
     selectedEntries = selectedEntries.filter(entry => entry.symbol !== symbol);
   }
 
@@ -79,34 +77,22 @@
           {e.symbol}
           <button
             class="small-btn remove-btn"
-            on:click={() => removeSymbol(e.symbol)}
+            on:click={() => deselectSymbol(e.symbol)}
           >−</button>
         </span>
       {/each}
     {:else}
-      None
+      <span class="symbol-item">None</span>
     {/if}
   </div>
 
-  <div class='search-symbols'>
-    <h2>Search Symbols</h2>
-    <input placeholder="Search Symbol" bind:value={searchTerm} on:input={handleSearch} />
-    {#if searchResults.length}
-      <ul>
-        {#each searchResults as result}
-          <li>
-            {result.symbol} - {result.description}
-            {#if !selectedEntries.some(entry => entry.symbol === result.symbol)}
-              <button
-                class="small-btn add-btn"
-                on:click={() => addSymbol(result.symbol)}
-              >+</button>
-            {/if}
-          </li>
-        {/each}
-      </ul>
-    {/if}
-  </div>
+  <SymbolSearch
+    mode="new"
+    {selectedEntries}
+    events={{
+      selectSymbol: (entry) => selectedEntries = [...selectedEntries, entry]
+    }}
+  />
 
 {:else}
   {#if watchlistData}
@@ -116,6 +102,12 @@
         <li>{entry.symbol}</li>
       {/each}
     </ul>
+    <button
+      class="delete"
+      on:click={() => handleDelete(watchlistData.name)}
+    >
+      Delete Watchlist
+    </button>
   {:else}
     {#if errorMessage}<p class="error">{errorMessage}</p>{/if}
     <p>Loading watchlist...</p>
@@ -123,8 +115,6 @@
 {/if}
 
 <style>
-  .error { color: red; }
-
   h2 span.name {
     color: #6a6a6a;
   }
@@ -133,53 +123,6 @@
     font-size: 1.17em;
     font-weight: bold;
     margin: 1em 0;
-  }
-
-  .search-symbols {
-    background-color: #f0f7ff; /* light blue */
-    border-radius: 8px;
-    padding: 1.5rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06); /* subtle depth */
-    border: 1px solid #d6e4f5; /* soft border */
-  }
-
-  .search-symbols h2 {
-    margin-top: 0;
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: #1a4b7c; /* deep blue for heading */
-  }
-
-  .search-symbols input {
-    border: 1px solid #c3d9f0;
-    /* border-radius: 4px; */
-    /* padding: 0.5rem;
-    font-size: 1rem;
-    outline: none;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease; */
-  }
-
-  .search-symbols input:focus {
-    border-color: #4a90e2;
-    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
-  }
-
-  .small-btn {
-    padding: 0.15rem 0.4rem;
-    font-size: 0.85rem;
-    border-radius: 4px;
-    border: none;
-    cursor: pointer;
-    margin-left: 0.3rem;
-  }
-
-  .add-btn {
-    background-color: #4a90e2;
-    color: white;
-  }
-
-  .add-btn:hover {
-    background-color: #357ab8;
   }
 
   .remove-btn {
@@ -193,5 +136,6 @@
 
   .symbol-item {
     margin-right: 0.5rem;
+    font-weight: normal;
   }
 </style>

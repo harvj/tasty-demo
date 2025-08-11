@@ -6,7 +6,7 @@
   let watchlists = [];
   let errorMessage = '';
 
-  async function loadWatchlists() {
+  export async function loadWatchlists() {
     errorMessage = '';
     const { success, result, message } = await getWatchlists();
     if (success) {
@@ -96,7 +96,6 @@
   }
 
   .error {
-    color: red;
     margin-bottom: 8px;
   }
 </style>

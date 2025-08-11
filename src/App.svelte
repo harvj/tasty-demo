@@ -3,10 +3,15 @@
   import Login from './components/Login.svelte';
   import Navbar from './components/Navbar.svelte';
   import Sidebar from './components/Sidebar.svelte';
-  import WatchListView from './components/WatchListView.svelte';
+  import WatchlistView from './components/WatchlistView.svelte';
   import { onDestroy } from 'svelte';
 
+  let sidebarRef;
   let loggedIn = false;
+
+  function handleWatchlistsChanged() {
+    sidebarRef.refreshWatchlists();
+  }
   const unsubscribe = session.subscribe(s => {
     loggedIn = !!s?.token;
   });
@@ -18,9 +23,9 @@
 {#if loggedIn}
   <div class='layout'>
     <div class="main-content">
-      <WatchListView />
+      <WatchlistView events={{ watchlistsChanged: handleWatchlistsChanged }} />
     </div>
-    <Sidebar />
+    <Sidebar bind:this={sidebarRef} />
   </div>
 {:else}
   <Login />
