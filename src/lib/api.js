@@ -117,10 +117,6 @@ export async function searchSymbols(query) {
   return request('GET', `/symbols/search/${encodeURIComponent(query)}`);
 }
 
-export default {
-  getWatchlists,
-  createWatchlist,
-  deleteWatchlist,
-  login,
-  logout
-};
+export async function getMarketData(symbol) {
+  return request('GET', `/market-data/${encodeURIComponent(symbol)}`);
+}

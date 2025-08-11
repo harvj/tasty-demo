@@ -1,17 +1,41 @@
 import { get, writable } from 'svelte/store';
 import { session } from './session';
+import { getMarketData } from '../lib/api';
 
 export const quotes = writable({});
 
 let socket;
 let channelId = 1;
 
+export async function fetchInitialQuotes(symbols) {
+  for (const symbol of symbols) {
+    const { success, result, message } = await getMarketData(symbol);
+    if (success) {
+      const updates = {};
+      const d = result.data;
+      updates[d.symbol] = {
+        bid: d.bid !== undefined ? parseFloat(d.bid) : undefined,
+        ask: d.ask !== undefined ? parseFloat(d.ask) : undefined,
+        last: d.last !== undefined ? parseFloat(d.last) : undefined
+       };
+      quotes.update(q => {
+        const merged = { ...q };
+        for (const sym in updates) {
+          merged[sym] = { ...(q[sym] || {}), ...updates[sym] };
+        }
+        return merged;
+      });
+    } else {
+      console.error(message);
+    }
+  };
+}
+
 export function connectQuotes(symbols) {
   const current = get(session);
   socket = new WebSocket(current.dxlinkUrl);
 
   socket.onopen = () => {
-    console.log("opening")
     // 1. Setup
     socket.send(JSON.stringify({
       type: 'SETUP',
@@ -61,9 +85,9 @@ export function connectQuotes(symbols) {
             ask: d[11]      // askPrice from Array
           };
         } else if (d[0] === 'Trade') {
-          updates[d[1]] = {
+          updates[d[1]] = { // eventSymbol from Array
             ...(updates[d[1]] || {}),
-            last: d[7]
+            last: d[7]      // lastPrice from Array
           };
         }
       });

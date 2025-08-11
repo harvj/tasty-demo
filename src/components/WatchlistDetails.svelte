@@ -1,6 +1,6 @@
 <script>
   import { updateWatchlist } from '../lib/api';
-  import { quotes, connectQuotes, disconnectQuotes } from '../stores/quotes';
+  import { quotes, connectQuotes, disconnectQuotes, fetchInitialQuotes } from '../stores/quotes';
   import { onDestroy } from 'svelte';
 
   export let events = {};
@@ -21,8 +21,10 @@
 
   $: {
     if (entries.length > 0) {
+      const symbols = entries.map(e => e.symbol);
+      fetchInitialQuotes(symbols);
       disconnectQuotes();
-      connectQuotes(entries.map(e => e.symbol));
+      connectQuotes(symbols);
     } else {
       disconnectQuotes();
     }
