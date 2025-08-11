@@ -35,10 +35,6 @@ h1 {
   line-height: 1.1;
 }
 
-#app {
-  text-align: center;
-}
-
 form {
   display: flex;
   flex-direction: column;

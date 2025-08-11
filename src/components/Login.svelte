@@ -1,5 +1,5 @@
 <script>
-  import { login } from '../lib/api.js';
+  import { login, getApiQuoteToken } from '../lib/api';
 
   let username = '';
   let password = '';
@@ -9,7 +9,9 @@
     errorMessage = '';
     const result = await login(username, password);
 
-    if (!result.success) {
+    if (result.success) {
+      await getApiQuoteToken();
+    } else {
       errorMessage = result.message;
     }
   }

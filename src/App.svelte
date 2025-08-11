@@ -3,6 +3,7 @@
   import Login from './components/Login.svelte';
   import Navbar from './components/Navbar.svelte';
   import Sidebar from './components/Sidebar.svelte';
+  import WatchListView from './components/WatchListView.svelte';
   import { onDestroy } from 'svelte';
 
   let loggedIn = false;
@@ -15,22 +16,24 @@
 <Navbar />
 
 {#if loggedIn}
-  <div class="main-content with-sidebar">
-    <h1>Welcome!</h1>
+  <div class='layout'>
+    <div class="main-content">
+      <WatchListView />
+    </div>
+    <Sidebar />
   </div>
-  <Sidebar />
 {:else}
   <Login />
 {/if}
 
 <style>
-  .main-content {
-    padding: 1rem;
-    margin-top: 60px; /* navbar height */
-    transition: margin-right 0.3s ease;
-  }
+.layout {
+  display: grid;
+  grid-template-columns: auto minmax(auto, 300px);
+  height: 100%;
+}
 
-  .with-sidebar {
-    margin-right: 300px; /* sidebar width */
-  }
+.main-content {
+  padding: 1rem;
+}
 </style>

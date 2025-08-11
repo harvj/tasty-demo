@@ -1,6 +1,6 @@
 <script>
   import { session } from '../stores/session';
-  import { logout } from '../lib/api.js';
+  import { logout } from '../lib/api';
 </script>
 
 {#if $session}

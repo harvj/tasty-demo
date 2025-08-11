@@ -21,74 +21,106 @@ async function request(method, endpoint, body) {
     headers.Authorization = token;
   }
 
-  const url = `${API_BASE_URL}${endpoint}`
-  console.log(`Fetching ${url}`)
-  const response = await fetch(url, {
-    method,
-    headers,
-    body: body ? JSON.stringify(body) : undefined,
-  });
+  try {
+    const url = `${API_BASE_URL}${endpoint}`
+    console.log(`Fetching ${url}`)
+    const response = await fetch(url, {
+      method,
+      headers,
+      body: body ? JSON.stringify(body) : undefined,
+    });
 
-  if (!response.ok) {
-    if (response.status === 401) {
-      throw new Error('401 Unauthorized')
+    if (!response.ok) {
+      const message = response.status === 401 ? '401 Unauthorized' : `API ${method} ${endpoint} failed: ${await response.text()}`
+      console.error(message)
+      return { success: false, message };
     }
-    const errMsg = await response.text();
-    throw new Error(`API ${method} ${endpoint} failed: ${errMsg}`);
-  }
 
-  const contentType = response.headers?.get?.('content-type') || '';
-  if (!contentType.includes('application/json')) {
-    return null;
+    const contentType = response.headers?.get?.('content-type') || '';
+    if (!contentType.includes('application/json')) {
+      return { success: true, result: null };
+    }
+
+    const result = await response.json();
+    console.log(result)
+    return { success: true, result };
+  } catch (err) {
+    console.error(err);
+    return { success: false, message: err.message };
   }
-  return response.json();
 }
 
 export async function login(username, password) {
-  try {
-    const result = await request('POST', '/sessions', {
-      login: username,
-      password
-    });
+  const response = await request('POST', '/sessions', {
+    login: username,
+    password
+  });
 
+  if (response.success && response.result?.data) {
     session.set({
       user: {
-        username: result.data.user.username,
-        email: result.data.user.email
+        username: response.result.data.user.username,
+        email: response.result.data.user.email
       },
-      token: result.data['session-token']
+      token: response.result.data['session-token']
     });
-
-    return result;
-  } catch (err) {
-    console.error(err);
+  } else {
     session.set(null);
-    return {
-      success: false,
-      message: err.message.includes('401')
-        ? 'Invalid username or password.'
-        : 'Unable to connect to the server. Please try again.'
-    };
+    response.message = response.message?.includes('401')
+      ? 'Invalid username or password.'
+      : response.message || 'Unable to connect to the server. Please try again.';
   }
+
+  return response;
 }
 
 export async function logout() {
-  try {
-    await request('DELETE', '/sessions');
-  } catch (err) {
-    console.error(err)
-  } finally {
-    session.set(null);
+  const response = await request('DELETE', '/sessions');
+  session.set(null);
+  return response;
+}
+
+export async function getApiQuoteToken() {
+  const response = await request('GET', '/api-quote-tokens');
+
+  if (response.success && response.result?.data) {
+    session.update(current => ({
+      ...current,
+      apiQuoteToken: response.result.data.token,
+      dxlinkUrl: response.result.data['dxlink-url']
+    }));
   }
+  console.log(get(session));
+}
+
+export async function getWatchlist(name) {
+  return request('GET', `/watchlists/${encodeURIComponent(name)}`);
 }
 
 export async function getWatchlists() {
-  const result = await request('GET', '/watchlists');
-  return result.data.items;
+  return request('GET', '/watchlists');
+}
+
+export async function createWatchlist(name, entries) {
+  return request('POST', '/watchlists', { name, "watchlist-entries": entries });
+}
+
+export async function updateWatchlist(name, entries) {
+  return request('PUT', `/watchlists/${encodeURIComponent(name)}`, { "watchlist-entries": entries });
+}
+
+export async function deleteWatchlist(name) {
+  return request('DELETE', `/watchlists/${encodeURIComponent(name)}`);
+}
+
+export async function searchSymbols(query) {
+  return request('GET', `/symbols/search/${encodeURIComponent(query)}`);
 }
 
 export default {
   getWatchlists,
+  createWatchlist,
+  deleteWatchlist,
   login,
   logout
 };
