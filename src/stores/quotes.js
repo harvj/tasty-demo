@@ -11,6 +11,7 @@ export function connectQuotes(symbols) {
   socket = new WebSocket(current.dxlinkUrl);
 
   socket.onopen = () => {
+    console.log("opening")
     // 1. Setup
     socket.send(JSON.stringify({
       type: 'SETUP',
@@ -39,24 +40,40 @@ export function connectQuotes(symbols) {
     socket.send(JSON.stringify({
       type: 'FEED_SUBSCRIPTION',
       channel: channelId,
-      add: symbols.map(symbol => ({ symbol, type: 'Quote' }))
+      add: symbols.flatMap(symbol => [
+        { symbol, type: 'Quote' },
+        { symbol, type: 'Trade' }
+      ])
     }));
   };
 
   socket.onmessage = (event) => {
     const msg = JSON.parse(event.data);
+    console.log(msg);
 
     if (msg.type === 'FEED_DATA' && msg.channel === channelId) {
       const updates = {};
       msg.data.forEach(d => {
-        updates[d.eventSymbol] = {
-          bid: d.bidPrice,
-          ask: d.askPrice,
-          bidSize: d.bidSize,
-          askSize: d.askSize
-        };
+        if (d[0] === 'Quote') {
+          updates[d[1]] = { // eventSymbol from Array
+            ...(updates[d[1]] || {}),
+            bid: d[7],      // bidPrice from Array
+            ask: d[11]      // askPrice from Array
+          };
+        } else if (d[0] === 'Trade') {
+          updates[d[1]] = {
+            ...(updates[d[1]] || {}),
+            last: d[7]
+          };
+        }
       });
-      quotes.update(q => ({ ...q, ...updates }));
+      quotes.update(q => {
+        const merged = { ...q };
+        for (const sym in updates) {
+          merged[sym] = { ...(q[sym] || {}), ...updates[sym] };
+        }
+        return merged;
+      });
     }
   };
 

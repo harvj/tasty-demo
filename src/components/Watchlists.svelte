@@ -11,6 +11,7 @@
     const { success, result, message } = await getWatchlists();
     if (success) {
       watchlists = result.data.items;
+      session.update(s => ({ ...s, watchlist: watchlists[0]?.name }));
     } else {
       watchlists = [];
       errorMessage = message;

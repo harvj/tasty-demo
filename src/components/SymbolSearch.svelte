@@ -41,6 +41,11 @@
   function isSelected(symbol) {
     return selectedEntries.some(e => e.symbol === symbol);
   }
+
+  function clearSearch() {
+    searchTerm = '';
+    searchResults = [];
+  }
 </script>
 
 <div class="symbol-search">
@@ -51,6 +56,14 @@
     bind:value={searchTerm}
     on:input={doSearch}
   />
+  {#if searchTerm.length > 0}
+    <button
+      class="clear"
+      on:click={clearSearch}
+    >
+      Clear Search
+    </button>
+  {/if}
 
   {#if loading}
     <div class="loading">Searching...</div>
@@ -91,6 +104,7 @@
 
   .symbol-search input {
     border: 1px solid #c3d9f0;
+    margin-right: 10px;
   }
 
   .symbol-search input:focus {
@@ -105,5 +119,13 @@
 
   .add-btn:hover {
     background-color: #357ab8;
+  }
+
+  button.clear {
+    all: unset;
+    cursor: pointer;
+    display: inline-block;
+    font-style: italic;
+    color: #6d8196;
   }
 </style>
