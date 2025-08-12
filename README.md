@@ -6,6 +6,7 @@ It includes:
 - Full watchlist management
 - Live bid/ask/last quote updates.
 - Historical and live candle data (e.g., 24 hours at 5-minute intervals).
+*(Note: Dxlink is no longer giving me historic data with an adjusted FEED_SETUP so the chart is only displaying live candle data)*
 - Plotly-based candlestick chart.
 - Full Svelte component structure with reactive WebSocket subscriptions.
 
