@@ -20,5 +20,8 @@
     "svelte": "^5.37.3",
     "vite": "^7.1.0",
     "vitest": "3.2.4"
+  },
+  "dependencies": {
+    "plotly.js-dist-min": "3.1.0"
   }
 }

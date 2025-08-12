@@ -90,7 +90,6 @@ export async function getApiQuoteToken() {
       dxlinkUrl: response.result.data['dxlink-url']
     }));
   }
-  console.log(get(session));
 }
 
 export async function getWatchlist(name) {
@@ -118,5 +117,8 @@ export async function searchSymbols(query) {
 }
 
 export async function getMarketData(symbol) {
+  /**
+   * /market-data/by-type?equity=symbol was interpreting :by-type as the symbol (unknown)
+   */
   return request('GET', `/market-data/${encodeURIComponent(symbol)}`);
 }

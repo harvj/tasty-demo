@@ -19,7 +19,7 @@
   }
 
   function selectWatchlist(name) {
-    session.update(s => ({ ...s, watchlist: name }));
+    session.update(s => ({ ...s, watchlist: name, symbol: null, lastPrice: null }));
   }
 
   onMount(loadWatchlists);

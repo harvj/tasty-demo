@@ -2,6 +2,7 @@
   import { updateWatchlist } from '../lib/api';
   import { quotes, connectQuotes, disconnectQuotes, fetchInitialQuotes } from '../stores/quotes';
   import { onDestroy } from 'svelte';
+  import { session } from '../stores/session';
 
   export let events = {};
   export let watchlistName = '';
@@ -30,6 +31,10 @@
     }
   }
 
+  function selectSymbol(symbol, lastPrice) {
+    session.update(s => ({ ...s, symbol, lastPrice }));
+  }
+
   function formatPrice(value) {
     return (typeof value === 'number') ? `$${value.toFixed(2)}` : '--';
   }
@@ -37,7 +42,6 @@
   onDestroy(() => {
     disconnectQuotes();
   });
-
 </script>
 
 <div class="watchlist-details">
@@ -58,10 +62,17 @@
           <td>
             <button class="small-btn remove-btn" on:click={() => removeEntry(entry.symbol)}>-</button>
           </td>
-          <td>{entry.symbol}</td>
+          <td>
+            <button on:click={() => {
+              selectSymbol(entry.symbol, formatPrice(liveQuotes[entry.symbol]?.last))
+            }}
+            >
+              {entry.symbol}
+            </button>
+          </td>
           <td class="d">{formatPrice(liveQuotes[entry.symbol]?.bid)}</td>
-          <td class="d">{formatPrice(liveQuotes[entry.symbol]?.bid)}</td>
-          <td class="d">{formatPrice(liveQuotes[entry.symbol]?.bid)}</td>
+          <td class="d">{formatPrice(liveQuotes[entry.symbol]?.ask)}</td>
+          <td class="d">{formatPrice(liveQuotes[entry.symbol]?.last)}</td>
         </tr>
       {/each}
     </tbody>

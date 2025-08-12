@@ -5,6 +5,7 @@
   import Sidebar from './components/Sidebar.svelte';
   import WatchlistView from './components/WatchlistView.svelte';
   import { onDestroy } from 'svelte';
+    import SymbolDetails from './components/SymbolDetails.svelte';
 
   let sidebarRef;
   let loggedIn = false;
@@ -23,7 +24,11 @@
 {#if loggedIn}
   <div class='layout'>
     <div class="main-content">
-      <WatchlistView events={{ watchlistsChanged: handleWatchlistsChanged }} />
+      {#if $session.symbol}
+        <SymbolDetails />
+      {:else}
+        <WatchlistView events={{ watchlistsChanged: handleWatchlistsChanged }} />
+      {/if}
     </div>
     <Sidebar bind:this={sidebarRef} />
   </div>
